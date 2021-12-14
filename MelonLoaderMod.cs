@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using StressLevelZero.Rig;
+using ModThatIsNotMod;
 
 namespace SlowMoPostProcessing
 {
@@ -16,15 +17,19 @@ namespace SlowMoPostProcessing
 
     public class SlowMoPostProcessing : MelonMod
     {
+        public PostProcessVolume cachedVolume;
+        public override void OnSceneWasInitialized(int buildIndex, string sceneName)
+        {
+            cachedVolume = ModThatIsNotMod.Player.GetRigManager().GetComponentInChildren<PostProcessVolume>();
+        }
         public override void OnUpdate()
         {
-            if (Time.timeScale <= 0.0f)
+            if (Time.timeScale <= 0.0f || cachedVolume == null)
                 return;
 
-            PostProcessVolume v = GameObject.Find("[RigManager (Default Brett)]").GetComponent<RigManager>().gameWorldSkeletonRig.m_head.GetChild(0).GetComponent<PostProcessVolume>();
-            ChromaticAberration ab = v.profile.settings[3].Cast<ChromaticAberration>();
+            ChromaticAberration ab = cachedVolume.profile.settings[3].Cast<ChromaticAberration>();
             ab.intensity.value = 0.1f / Time.timeScale;
-            v.profile.settings[3] = ab;
+            cachedVolume.profile.settings[3] = ab;
         }
     }
 }
